@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: app-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_HOST
+              value: mysql-service.db-namespace.svc.cluster.local
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: db-username  # Este debe ser el nombre correcto del usuario
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: db-password  # Este debe ser la contraseña correcta
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+
+  
+

@@ -1,0 +1,63 @@
+# Valores para el despliegue de la aplicación
+app:
+  name: my-app
+  image:
+    repository: my-app-image
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+# Valores para la base de datos
+database:
+  name: my-database
+  image:
+    repository: mysql
+    tag: "5.7"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  service:
+    port: 3306
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  storage:
+    size: 10Gi
+    accessMode: ReadWriteOnce
+  credentials:
+    secretRef: db-secret        # Nombre del secreto donde están las credenciales
+    rootPasswordKey: mysql-root-password  # Clave para la contraseña root
+    userKey: mysql-user          # Clave para el usuario
+    passwordKey: mysql-password   # Clave para la contraseña
+
+# Configuración del ingress (si se habilita)
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+  tls: []
+
+
+
+  
