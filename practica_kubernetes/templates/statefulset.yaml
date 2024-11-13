@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "my-helm-chart.fullname" . }}-mariadb
+  labels:
+    {{- include "my-helm-chart.mariadbLabels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "my-helm-chart.fullname" . }}-mariadb-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "my-helm-chart.mariadbSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "my-helm-chart.mariadbSelectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadb.image.repository }}:{{ .Values.mariadb.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadb.image.pullPolicy }}
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          envFrom:
+            - secretRef:
+                name: {{ include "my-helm-chart.fullname" . }}-mariadb-secret
+          volumeMounts:
+            - name: mariadb-storage
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mariadb-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.mariadb.persistence.size }}
+
